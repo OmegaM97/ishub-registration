@@ -6,7 +6,8 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from jose import jwt
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,6 +17,7 @@ from models.enums import UserRole
 from models.users import Users
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+bearer_scheme = HTTPBearer(auto_error=False)
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
@@ -49,6 +51,12 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class TokenData(BaseModel):
+    user_id: int
+    username: str
+    role: UserRole
 
 
 # --------------------
@@ -96,10 +104,28 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # JWT
 # --------------------
 
-def create_access_token(subject: str) -> str:
+def create_access_token(subject: str, extra_data: dict[str, str] | None = None) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {"sub": subject, "exp": expire}
+    if extra_data:
+        payload.update(extra_data)
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_access_token(token: str) -> TokenData:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = int(payload["sub"])
+        username = str(payload.get("username", ""))
+        role = UserRole(payload["role"])
+    except (JWTError, KeyError, ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return TokenData(user_id=user_id, username=username, role=role)
 
 
 # --------------------
@@ -153,6 +179,60 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
             detail="Invalid username or password"
         )
 
-    token = create_access_token(str(user.id))
+    token = create_access_token(
+        str(user.id),
+        extra_data={"username": user.username, "role": user.role.value},
+    )
 
     return TokenResponse(access_token=token)
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Users:
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token_data = decode_access_token(credentials.credentials)
+    user = db.get(Users, token_data.user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
+def get_current_admin(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Users:
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token_data = decode_access_token(credentials.credentials)
+    if token_data.role != UserRole.admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+
+    user = db.get(Users, token_data.user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user

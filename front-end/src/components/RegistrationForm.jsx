@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { ArrowLeft, Clock, Send, Sparkles } from "lucide-react";
 import logo from "../assets/ishub-logo.jpg";
 
@@ -20,10 +21,55 @@ const commitmentOptions = [
 ];
 
 export default function RegistrationForm({ onBackHome }) {
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = (formData) => {
+    const validationErrors = {};
+    const telegram = String(formData.get("telegram") || "").trim();
+    const phone = String(formData.get("phone") || "").trim();
+    const currentYear = Number(formData.get("currentYear"));
+
+    if (telegram && !/^@/.test(telegram)) {
+      validationErrors.telegram = "Telegram username must start with @.";
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      validationErrors.phone = "Phone number must be exactly 10 digits.";
+    }
+
+    if (!currentYear || currentYear < 1 || currentYear > 5) {
+      validationErrors.currentYear = "Current year must be between 1 and 5.";
+    }
+
+    return validationErrors;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.target);
+    const validationErrors = validateForm(formData);
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setFormError(
+        "Please complete all required fields and fix any highlighted form errors before submitting."
+      );
+
+      const firstErrorField = Object.keys(validationErrors)[0];
+      const field = event.target.elements[firstErrorField];
+      if (field && typeof field.focus === "function") {
+        field.scrollIntoView({ behavior: "smooth", block: "center" });
+        field.focus();
+      }
+
+      return;
+    }
+
+    setErrors({});
+    setFormError("");
     const payload = {
       full_name: formData.get("fullName"),
       email: formData.get("email"),
@@ -48,6 +94,7 @@ export default function RegistrationForm({ onBackHome }) {
     };
 
     try {
+      setIsSubmitting(true);
       const response = await fetch(
         "https://ishub-registration-production.up.railway.app/applications",
         {
@@ -71,6 +118,8 @@ export default function RegistrationForm({ onBackHome }) {
       }
     } catch (error) {
       redirectToResult("error", `Unable to submit application: ${error}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,7 +158,12 @@ export default function RegistrationForm({ onBackHome }) {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 sm:p-10">
+          <form onSubmit={handleSubmit} noValidate className="p-6 sm:p-10">
+            {formError && (
+              <div className="mb-6 rounded-xl2 border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                {formError}
+              </div>
+            )}
             <div className="mb-8 grid sm:grid-cols-2 gap-4">
               <div className="flex items-center gap-3 rounded-xl2 border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700">
                 <Sparkles size={18} className="text-primary shrink-0" />
@@ -144,15 +198,22 @@ export default function RegistrationForm({ onBackHome }) {
                 label="Phone Number"
                 name="phone"
                 type="tel"
-                placeholder="+251 900 000 000"
+                inputMode="numeric"
+                pattern="\d{10}"
+                maxLength={10}
+                placeholder="0914232313"
                 autoComplete="tel"
                 required
+                error={errors.phone}
               />
               <FormField
                 label="Telegram Username"
                 name="telegram"
                 placeholder="@username"
                 required
+                pattern="^@.*"
+                title="Telegram username must start with @"
+                error={errors.telegram}
               />
               <FormField
                 label="GitHub Profile"
@@ -184,6 +245,7 @@ export default function RegistrationForm({ onBackHome }) {
                 max="5"
                 placeholder="3"
                 required
+                error={errors.currentYear}
               />
               <FormField
                 label="Department"
@@ -242,10 +304,24 @@ export default function RegistrationForm({ onBackHome }) {
             <div className="mt-8 flex justify-end">
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-7 py-3.5 rounded-xl2 shadow-soft hover:shadow-softHover transition-all duration-200 hover:-translate-y-0.5"
+                disabled={isSubmitting}
+                className={`inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl2 shadow-soft transition-all duration-200 hover:-translate-y-0.5 ${
+                  isSubmitting
+                    ? "bg-slate-300 text-slate-700 cursor-not-allowed"
+                    : "bg-primary hover:bg-primary-dark text-white"
+                }`}
               >
-                Submit Application
-                <Send size={18} />
+                {isSubmitting ? (
+                  <>
+                    <Send size={18} className="animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    Submit Application
+                    <Send size={18} />
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -272,7 +348,7 @@ function RequiredMark() {
   );
 }
 
-function FormField({ label, name, type = "text", required, ...props }) {
+function FormField({ label, name, type = "text", required, error, ...props }) {
   return (
     <div>
       <label
@@ -287,9 +363,13 @@ function FormField({ label, name, type = "text", required, ...props }) {
         name={name}
         type={type}
         required={required}
-        className="w-full rounded-xl2 border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100"
+        aria-invalid={Boolean(error)}
+        className={`w-full rounded-xl2 border px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100 ${
+          error ? "border-rose-400 bg-rose-50" : "border-slate-200 bg-white"
+        }`}
         {...props}
       />
+      {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
     </div>
   );
 }

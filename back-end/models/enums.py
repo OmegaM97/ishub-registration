@@ -13,6 +13,13 @@ class PreferredTrack(str, Enum):
     mobile = "Mobile"
 
 
+class StudyYearCategory(str, Enum):
+    freshman = "freshman"
+    sophomore = "sophomore"
+    junior = "junior"
+    senior = "senior"
+
+
 class ExperienceLevel(str, Enum):
     beginner = "beginner"
     intermediate = "intermediate"

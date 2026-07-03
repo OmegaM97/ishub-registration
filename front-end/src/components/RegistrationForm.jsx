@@ -15,10 +15,10 @@ const experienceOptions = [
 ];
 
 const currentYearOptions = [
-  { label: "Freshman", value: "1" },
-  { label: "Sophomore", value: "2" },
-  { label: "Junior", value: "3" },
-  { label: "Senior", value: "4" },
+  { label: "Freshman", value: "freshman" },
+  { label: "Sophomore", value: "sophomore" },
+  { label: "Junior", value: "junior" },
+  { label: "Senior", value: "senior" },
 ];
 
 const commitmentOptions = [
@@ -34,20 +34,63 @@ export default function RegistrationForm({ onBackHome }) {
 
   const validateForm = (formData) => {
     const validationErrors = {};
-    const telegram = String(formData.get("telegram") || "").trim();
+    const fullName = String(formData.get("fullName") || "").trim();
+    const email = String(formData.get("email") || "").trim();
     const phone = String(formData.get("phone") || "").trim();
+    const telegram = String(formData.get("telegram") || "").trim();
+    const university = String(formData.get("university") || "").trim();
     const currentYear = formData.get("currentYear");
+    const department = String(formData.get("department") || "").trim();
+    const preferredTrack = formData.get("preferredTrack");
+    const priorExperience = formData.get("priorExperience");
+    const commitment = formData.get("commitment");
+    const motivation = String(formData.get("motivation") || "").trim();
 
-    if (telegram && !/^@/.test(telegram)) {
-      validationErrors.telegram = "Telegram username must start with @.";
+    if (!fullName) {
+      validationErrors.fullName = "Please enter your full name.";
+    }
+
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      validationErrors.email = "Please enter a valid email address.";
     }
 
     if (!/^\d{10}$/.test(phone)) {
       validationErrors.phone = "Phone number must be exactly 10 digits.";
     }
 
-    if (!currentYear || !["1", "2", "3", "4"].includes(currentYear)) {
+    if (telegram && !/^@/.test(telegram)) {
+      validationErrors.telegram = "Telegram username must start with @.";
+    }
+
+    if (!university) {
+      validationErrors.university = "Please enter your university name.";
+    }
+
+    if (
+      !currentYear ||
+      !["freshman", "sophomore", "junior", "senior"].includes(currentYear)
+    ) {
       validationErrors.currentYear = "Please select your academic year.";
+    }
+
+    if (!department) {
+      validationErrors.department = "Please enter your department.";
+    }
+
+    if (!preferredTrack) {
+      validationErrors.preferredTrack = "Please select your preferred track.";
+    }
+
+    if (!priorExperience) {
+      validationErrors.priorExperience = "Please choose your experience level.";
+    }
+
+    if (!commitment) {
+      validationErrors.commitment = "Please choose your weekly availability.";
+    }
+
+    if (!motivation) {
+      validationErrors.motivation = "Please tell us why you want to join.";
     }
 
     return validationErrors;
@@ -85,7 +128,7 @@ export default function RegistrationForm({ onBackHome }) {
       github_profile: formData.get("github"),
       linkedin_profile: formData.get("linkedin"),
       university_name: formData.get("university"),
-      current_year: Number(formData.get("currentYear")),
+      current_year: formData.get("currentYear"),
       department: formData.get("department"),
       preferred_track: formData.get("preferredTrack"),
       prior_experience: formData.get("priorExperience"),

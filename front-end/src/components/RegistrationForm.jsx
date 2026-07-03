@@ -2,20 +2,76 @@ import { ArrowLeft, Clock, Send, Sparkles } from "lucide-react";
 import logo from "../assets/ishub-logo.jpg";
 
 const trackOptions = [
-  "Artificial intelligence",
-  "Frontend Development",
-  "Backend Development",
-  "Mobile Development",
+  { label: "Artificial intelligence", value: "AI" },
+  { label: "Frontend Development", value: "Frontend" },
+  { label: "Backend Development", value: "Backend" },
+  { label: "Mobile Development", value: "Mobile" },
 ];
 
-const experienceOptions = ["Beginner", "Intermediate"];
+const experienceOptions = [
+  { label: "Beginner", value: "beginner" },
+  { label: "Intermediate", value: "intermediate" },
+];
 
-const commitmentOptions = ["Yes", "No", "Not sure yet"];
+const commitmentOptions = [
+  { label: "Yes", value: "Yes" },
+  { label: "No", value: "No" },
+  { label: "Not sure yet", value: "No" },
+];
 
 export default function RegistrationForm({ onBackHome }) {
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    alert("Thank you for applying to ISHub Summer Bootcamp!");
+
+    const formData = new FormData(event.target);
+    const payload = {
+      full_name: formData.get("fullName"),
+      email: formData.get("email"),
+      phone_number: formData.get("phone"),
+      telegram_username: formData.get("telegram"),
+      github_profile: formData.get("github"),
+      linkedin_profile: formData.get("linkedin"),
+      university_name: formData.get("university"),
+      current_year: Number(formData.get("currentYear")),
+      department: formData.get("department"),
+      preferred_track: formData.get("preferredTrack"),
+      prior_experience: formData.get("priorExperience"),
+      availability: formData.get("commitment") === "Yes",
+      why_join: formData.get("motivation"),
+    };
+
+    const redirectToResult = (status, message) => {
+      const url = new URL(window.location.origin + "/submission");
+      url.searchParams.set("status", status);
+      url.searchParams.set("message", message);
+      window.location.href = url.toString();
+    };
+
+    try {
+      const response = await fetch(
+        "https://ishub-registration-production.up.railway.app/applications",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (response.ok) {
+        redirectToResult(
+          "success",
+          "Your application has been submitted successfully.",
+        );
+      } else {
+        const errorText = await response.text();
+        redirectToResult(
+          "error",
+          `Submission failed: ${response.status} ${response.statusText}. ${errorText}`,
+        );
+      }
+    } catch (error) {
+      redirectToResult("error", `Unable to submit application: ${error}`);
+    }
   };
 
   return (
@@ -123,7 +179,10 @@ export default function RegistrationForm({ onBackHome }) {
               <FormField
                 label="Current Year"
                 name="currentYear"
-                placeholder="Example: 3rd Year"
+                type="number"
+                min="1"
+                max="5"
+                placeholder="3"
                 required
               />
               <FormField
@@ -264,8 +323,8 @@ function SelectField({
           {placeholder}
         </option>
         {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
       </select>

@@ -4,10 +4,51 @@ import logo from "../assets/ishub-logo.jpg";
 
 export default function AdminAuth({ onBackHome }) {
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setMessage("Admin login submitted successfully.");
+    setMessage("");
+    setMessageType("success");
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.target);
+    const payload = {
+      username: formData.get("username"),
+      password: formData.get("password"),
+    };
+
+    try {
+      const response = await fetch(
+        "https://ishub-registration-production.up.railway.app/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        window.localStorage.setItem("ishub_auth_token", data.access_token);
+        window.location.href = "/admin/dashboard";
+      } else {
+        setMessage(
+          data.detail ||
+            data.message ||
+            "Login failed. Please check your credentials.",
+        );
+        setMessageType("error");
+      }
+    } catch (error) {
+      setMessage(`Login could not be completed: ${error}`);
+      setMessageType("error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -66,35 +107,56 @@ export default function AdminAuth({ onBackHome }) {
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <AuthField
-                label="Admin Email"
-                name="adminEmail"
-                type="email"
+                label="Username"
+                name="username"
+                type="text"
                 icon={Mail}
-                autoComplete="email"
+                autoComplete="username"
                 required
               />
 
               <AuthField
                 label="Password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 icon={Lock}
                 autoComplete="current-password"
                 minLength="8"
                 required
               />
 
+              <label className="inline-flex items-center gap-2 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={(event) => setShowPassword(event.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                />
+                Show password
+              </label>
+
               {message && (
-                <div className="rounded-xl2 border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-primary">
+                <div
+                  className={`rounded-xl2 border px-4 py-3 text-sm font-medium ${
+                    messageType === "success"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-rose-200 bg-rose-50 text-rose-800"
+                  }`}
+                >
                   {message}
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-7 py-3.5 rounded-xl2 shadow-soft hover:shadow-softHover transition-all duration-200 hover:-translate-y-0.5"
+                disabled={isSubmitting}
+                className={`w-full inline-flex items-center justify-center gap-2 rounded-xl2 px-7 py-3.5 font-semibold shadow-soft transition-all duration-200 hover:-translate-y-0.5 ${
+                  isSubmitting
+                    ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                    : "bg-primary hover:bg-primary-dark text-white"
+                }`}
               >
-                Login
+                {isSubmitting ? "Logging in..." : "Login"}
                 <ShieldCheck size={18} />
               </button>
             </form>

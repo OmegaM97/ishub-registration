@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, Clock, Send, Sparkles } from "lucide-react";
 import logo from "../assets/ishub-logo.jpg";
 
@@ -55,7 +55,7 @@ export default function RegistrationForm({ onBackHome }) {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setFormError(
-        "Please complete all required fields and fix any highlighted form errors before submitting."
+        "Please complete all required fields and fix any highlighted form errors before submitting.",
       );
 
       const firstErrorField = Object.keys(validationErrors)[0];

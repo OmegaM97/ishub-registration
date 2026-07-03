@@ -8,12 +8,7 @@ const trackOptions = [
   "Mobile Development",
 ];
 
-const experienceOptions = [
-  "No prior experience",
-  "Beginner",
-  "Intermediate",
-  "Advanced",
-];
+const experienceOptions = ["Beginner", "Intermediate"];
 
 const commitmentOptions = ["Yes", "No", "Not sure yet"];
 

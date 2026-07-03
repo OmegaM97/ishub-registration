@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from db import get_db
 from auth import get_current_admin
-from models.enums import ExperienceLevel, PreferredTrack
+from models.enums import ExperienceLevel, PreferredTrack, StudyYearCategory
 from models.registration import Registration
 
 router = APIRouter(prefix="/applications", tags=["applications"])
@@ -24,7 +24,7 @@ class ApplicationCreate(BaseModel):
     github_profile: str | None = Field(default=None, max_length=255, description="GitHub profile URL")
     linkedin_profile: str | None = Field(default=None, max_length=255, description="LinkedIn profile URL")
     university_name: str = Field(..., min_length=1, max_length=255, description="University name")
-    current_year: int = Field(..., ge=1, le=5, description="Current study year from 1 to 5")
+    current_year: StudyYearCategory = Field(..., description="Current study year category")
     department: str = Field(..., min_length=1, max_length=255, description="Department")
     preferred_track: PreferredTrack = Field(..., description="Preferred track")
     prior_experience: ExperienceLevel = Field(..., description="Prior experience level")
@@ -43,7 +43,7 @@ class ApplicationResponse(BaseModel):
     github_profile: str | None
     linkedin_profile: str | None
     university_name: str
-    current_year: int
+    current_year: StudyYearCategory
     department: str
     preferred_track: PreferredTrack
     prior_experience: ExperienceLevel

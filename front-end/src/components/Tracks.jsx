@@ -24,7 +24,7 @@ const tracks = [
     icon: Smartphone,
     title: "Mobile Development",
     description:
-      "Learn to build cross-platform mobile applications using React Native, Expo, JavaScript, navigation, APIs, and mobile UI design.",
+      "Learn Flutter to build beautiful cross-platform mobile applications with responsive UIs, state management, API integration, navigation, and modern mobile development practices.",
   },
 ];
 

@@ -14,6 +14,13 @@ const experienceOptions = [
   { label: "Intermediate", value: "intermediate" },
 ];
 
+const currentYearOptions = [
+  { label: "Freshman", value: "1" },
+  { label: "Sophomore", value: "2" },
+  { label: "Junior", value: "3" },
+  { label: "Senior", value: "4" },
+];
+
 const commitmentOptions = [
   { label: "Yes", value: "Yes" },
   { label: "No", value: "No" },
@@ -29,7 +36,7 @@ export default function RegistrationForm({ onBackHome }) {
     const validationErrors = {};
     const telegram = String(formData.get("telegram") || "").trim();
     const phone = String(formData.get("phone") || "").trim();
-    const currentYear = Number(formData.get("currentYear"));
+    const currentYear = formData.get("currentYear");
 
     if (telegram && !/^@/.test(telegram)) {
       validationErrors.telegram = "Telegram username must start with @.";
@@ -39,8 +46,8 @@ export default function RegistrationForm({ onBackHome }) {
       validationErrors.phone = "Phone number must be exactly 10 digits.";
     }
 
-    if (!currentYear || currentYear < 1 || currentYear > 5) {
-      validationErrors.currentYear = "Current year must be between 1 and 5.";
+    if (!currentYear || !["1", "2", "3", "4"].includes(currentYear)) {
+      validationErrors.currentYear = "Please select your academic year.";
     }
 
     return validationErrors;
@@ -237,13 +244,11 @@ export default function RegistrationForm({ onBackHome }) {
                 placeholder="Enter your university name"
                 required
               />
-              <FormField
-                label="Current Year"
+              <SelectField
+                label="Academic Year"
                 name="currentYear"
-                type="number"
-                min="1"
-                max="5"
-                placeholder="3"
+                options={currentYearOptions}
+                placeholder="Select your academic year"
                 required
                 error={errors.currentYear}
               />

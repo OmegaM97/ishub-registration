@@ -88,7 +88,7 @@ export default function AdminDashboard({ onBackHome }) {
 
   return (
     <main className="min-h-screen bg-slate-50 pt-28 pb-16">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         <button
           type="button"
           onClick={onBackHome}

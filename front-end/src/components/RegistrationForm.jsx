@@ -1,14 +1,6 @@
 import { ArrowLeft, Clock, Send, Sparkles } from "lucide-react";
 import logo from "../assets/ishub-logo.jpg";
 
-const yearOptions = [
-  "1st Year",
-  "2nd Year",
-  "3rd Year",
-  "4th Year",
-  "5th Year",
-];
-
 const trackOptions = [
   "Artificial intelligence",
   "Frontend Development",
@@ -133,11 +125,10 @@ export default function RegistrationForm({ onBackHome }) {
                 placeholder="Enter your university name"
                 required
               />
-              <SelectField
+              <FormField
                 label="Current Year"
                 name="currentYear"
-                options={yearOptions}
-                placeholder="Choose your current year"
+                placeholder="Example: 3rd Year"
                 required
               />
               <FormField

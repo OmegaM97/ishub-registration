@@ -28,41 +28,85 @@ const commitmentOptions = [
 ];
 
 export default function RegistrationForm({ onBackHome }) {
+  const [formValues, setFormValues] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    telegram: "",
+    github: "",
+    linkedin: "",
+    university: "",
+    currentYear: "",
+    department: "",
+    preferredTrack: "",
+    priorExperience: "",
+    commitment: "",
+    motivation: "",
+  });
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateForm = (formData) => {
-    const validationErrors = {};
-    const fullName = String(formData.get("fullName") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const phone = String(formData.get("phone") || "").trim();
-    const telegram = String(formData.get("telegram") || "").trim();
-    const university = String(formData.get("university") || "").trim();
-    const currentYear = formData.get("currentYear");
-    const department = String(formData.get("department") || "").trim();
-    const preferredTrack = formData.get("preferredTrack");
-    const priorExperience = formData.get("priorExperience");
-    const commitment = formData.get("commitment");
-    const motivation = String(formData.get("motivation") || "").trim();
+  const handleFieldChange = (event) => {
+    const { name, value } = event.target;
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [name]: value,
+    }));
 
-    if (!fullName) {
+    if (errors[name]) {
+      setErrors((currentErrors) => {
+        const nextErrors = { ...currentErrors };
+        delete nextErrors[name];
+        return nextErrors;
+      });
+    }
+
+    if (formError) {
+      setFormError("");
+    }
+  };
+
+  const validateForm = (values) => {
+    const validationErrors = {};
+    const fullName = String(values.fullName || "").trim();
+    const email = String(values.email || "").trim();
+    const phone = String(values.phone || "").trim();
+    const telegram = String(values.telegram || "").trim();
+    const github = String(values.github || "").trim();
+    const linkedin = String(values.linkedin || "").trim();
+    const university = String(values.university || "").trim();
+    const currentYear = values.currentYear;
+    const department = String(values.department || "").trim();
+    const preferredTrack = values.preferredTrack;
+    const priorExperience = values.priorExperience;
+    const commitment = values.commitment;
+    const motivation = String(values.motivation || "").trim();
+
+    if (!fullName || fullName.length < 2) {
       validationErrors.fullName = "Please enter your full name.";
     }
 
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+    if (!email) {
+      validationErrors.email = "Please enter your email address.";
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
       validationErrors.email = "Please enter a valid email address.";
     }
 
-    if (!/^\d{10}$/.test(phone)) {
+    if (!phone) {
+      validationErrors.phone = "Please enter your phone number.";
+    } else if (!/^\d{10}$/.test(phone)) {
       validationErrors.phone = "Phone number must be exactly 10 digits.";
     }
 
-    if (telegram && !/^@/.test(telegram)) {
-      validationErrors.telegram = "Telegram username must start with @.";
+    if (!telegram) {
+      validationErrors.telegram = "Please enter your Telegram username.";
+    } else if (!/^@[A-Za-z0-9_]+$/.test(telegram)) {
+      validationErrors.telegram =
+        "Telegram username must start with @ and contain only letters, numbers, or underscores.";
     }
 
-    if (!university) {
+    if (!university || university.length < 2) {
       validationErrors.university = "Please enter your university name.";
     }
 
@@ -73,7 +117,7 @@ export default function RegistrationForm({ onBackHome }) {
       validationErrors.currentYear = "Please select your academic year.";
     }
 
-    if (!department) {
+    if (!department || department.length < 2) {
       validationErrors.department = "Please enter your department.";
     }
 
@@ -89,8 +133,19 @@ export default function RegistrationForm({ onBackHome }) {
       validationErrors.commitment = "Please choose your weekly availability.";
     }
 
-    if (!motivation) {
-      validationErrors.motivation = "Please tell us why you want to join.";
+    if (!motivation || motivation.length < 10) {
+      validationErrors.motivation =
+        "Please tell us why you want to join with at least 10 characters.";
+    }
+
+    if (github && !/^https?:\/\/\S+$/i.test(github)) {
+      validationErrors.github =
+        "Please enter a valid URL for your GitHub profile.";
+    }
+
+    if (linkedin && !/^https?:\/\/\S+$/i.test(linkedin)) {
+      validationErrors.linkedin =
+        "Please enter a valid URL for your LinkedIn profile.";
     }
 
     return validationErrors;
@@ -99,8 +154,7 @@ export default function RegistrationForm({ onBackHome }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const formData = new FormData(event.target);
-    const validationErrors = validateForm(formData);
+    const validationErrors = validateForm(formValues);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -121,19 +175,19 @@ export default function RegistrationForm({ onBackHome }) {
     setErrors({});
     setFormError("");
     const payload = {
-      full_name: formData.get("fullName"),
-      email: formData.get("email"),
-      phone_number: formData.get("phone"),
-      telegram_username: formData.get("telegram"),
-      github_profile: formData.get("github"),
-      linkedin_profile: formData.get("linkedin"),
-      university_name: formData.get("university"),
-      current_year: formData.get("currentYear"),
-      department: formData.get("department"),
-      preferred_track: formData.get("preferredTrack"),
-      prior_experience: formData.get("priorExperience"),
-      availability: formData.get("commitment") === "Yes",
-      why_join: formData.get("motivation"),
+      full_name: formValues.fullName,
+      email: formValues.email,
+      phone_number: formValues.phone,
+      telegram_username: formValues.telegram,
+      github_profile: formValues.github,
+      linkedin_profile: formValues.linkedin,
+      university_name: formValues.university,
+      current_year: formValues.currentYear,
+      department: formValues.department,
+      preferred_track: formValues.preferredTrack,
+      prior_experience: formValues.priorExperience,
+      availability: formValues.commitment === "Yes",
+      why_join: formValues.motivation,
     };
 
     const redirectToResult = (status, message) => {
@@ -208,7 +262,12 @@ export default function RegistrationForm({ onBackHome }) {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="p-6 sm:p-10">
+          <form
+            onSubmit={handleSubmit}
+            onChange={handleFieldChange}
+            noValidate
+            className="p-6 sm:p-10"
+          >
             {formError && (
               <div className="mb-6 rounded-xl2 border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
                 {formError}
@@ -235,6 +294,7 @@ export default function RegistrationForm({ onBackHome }) {
                 placeholder="Enter your full name"
                 autoComplete="name"
                 required
+                error={errors.fullName}
               />
               <FormField
                 label="Email"
@@ -243,6 +303,7 @@ export default function RegistrationForm({ onBackHome }) {
                 placeholder="example@email.com"
                 autoComplete="email"
                 required
+                error={errors.email}
               />
               <FormField
                 label="Phone Number"
@@ -270,12 +331,14 @@ export default function RegistrationForm({ onBackHome }) {
                 name="github"
                 type="url"
                 placeholder="https://github.com/username"
+                error={errors.github}
               />
               <FormField
                 label="LinkedIn Profile"
                 name="linkedin"
                 type="url"
                 placeholder="https://linkedin.com/in/username"
+                error={errors.linkedin}
               />
             </div>
 
@@ -286,6 +349,7 @@ export default function RegistrationForm({ onBackHome }) {
                 name="university"
                 placeholder="Enter your university name"
                 required
+                error={errors.university}
               />
               <SelectField
                 label="Academic Year"
@@ -300,6 +364,7 @@ export default function RegistrationForm({ onBackHome }) {
                 name="department"
                 placeholder="Example: Computer Science"
                 required
+                error={errors.department}
               />
               <SelectField
                 label="Preferred Track"
@@ -307,6 +372,7 @@ export default function RegistrationForm({ onBackHome }) {
                 options={trackOptions}
                 placeholder="Choose your preferred track"
                 required
+                error={errors.preferredTrack}
               />
             </div>
 
@@ -321,6 +387,7 @@ export default function RegistrationForm({ onBackHome }) {
                 options={experienceOptions}
                 placeholder="Choose your experience level"
                 required
+                error={errors.priorExperience}
               />
               <SelectField
                 label="Can you commit 10+ hours/week?"
@@ -328,6 +395,7 @@ export default function RegistrationForm({ onBackHome }) {
                 options={commitmentOptions}
                 placeholder="Choose your availability"
                 required
+                error={errors.commitment}
               />
             </div>
 
@@ -344,9 +412,19 @@ export default function RegistrationForm({ onBackHome }) {
                 name="motivation"
                 rows="5"
                 required
-                className="w-full rounded-xl2 border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100 resize-y"
+                aria-invalid={Boolean(errors.motivation)}
+                className={`w-full rounded-xl2 border px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100 resize-y ${
+                  errors.motivation
+                    ? "border-rose-400 bg-rose-50"
+                    : "border-slate-200 bg-white"
+                }`}
                 placeholder="Tell us what you hope to learn, build, or achieve during the bootcamp."
               />
+              {errors.motivation && (
+                <p className="mt-2 text-sm text-rose-600">
+                  {errors.motivation}
+                </p>
+              )}
             </div>
 
             <div className="mt-8 flex justify-end">
@@ -428,6 +506,7 @@ function SelectField({
   options,
   placeholder,
   required,
+  error,
   ...props
 }) {
   return (
@@ -444,7 +523,10 @@ function SelectField({
         name={name}
         defaultValue=""
         required={required}
-        className="w-full rounded-xl2 border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100"
+        aria-invalid={Boolean(error)}
+        className={`w-full rounded-xl2 border px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-blue-100 ${
+          error ? "border-rose-400 bg-rose-50" : "border-slate-200 bg-white"
+        }`}
         {...props}
       >
         <option value="" disabled>
@@ -456,6 +538,7 @@ function SelectField({
           </option>
         ))}
       </select>
+      {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
     </div>
   );
 }

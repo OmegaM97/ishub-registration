@@ -8,7 +8,7 @@ export default function Hero({ onApplyClick }) {
   return (
     <section
       id="top"
-      className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-28"
+      className="relative overflow-hidden pt-9 pb-6 lg:pt-12 lg:pb-12"
     >
       {/* Gradient background with abstract geometric shapes */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-blue-50" />
@@ -35,10 +35,8 @@ export default function Hero({ onApplyClick }) {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.08] tracking-tight text-slate-900">
-            Kickstart Your Tech Journey with{" "}
-            <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-              ISHub Summer Bootcamp
-            </span>
+            Kickstart Your Tech Journey with hands-on projects and expert
+            mentorship.
           </h1>
 
           <p className="mt-6 text-lg text-slate-600 leading-relaxed">

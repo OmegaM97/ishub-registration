@@ -1,4 +1,4 @@
-import Navbar from "./components/Navbar";
+import BrandLogo from "./components/BrandLogo";
 import Hero from "./components/Hero";
 import Tracks from "./components/Tracks";
 import WhyJoin from "./components/WhyJoin";
@@ -16,6 +16,7 @@ const SUBMISSION_URL = "/submission";
 
 export default function App() {
   const pathname = window.location.pathname;
+  const isHomePage = pathname === "/";
   const isRegistrationPage = pathname === REGISTRATION_URL;
   const isAdminLoginPage = pathname === ADMIN_LOGIN_URL;
   const isAdminDashboardPage = pathname === ADMIN_DASHBOARD_URL;
@@ -29,9 +30,18 @@ export default function App() {
     window.location.href = "/";
   };
 
+  const showStudentHeader =
+    isHomePage || isRegistrationPage || isSubmissionPage;
+
   return (
     <div className="min-h-screen bg-white">
-      <Navbar onApplyClick={handleApplyClick} />
+      {showStudentHeader && (
+        <header className="bg-white py-5 shadow-sm">
+          <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 lg:px-10">
+            <BrandLogo />
+          </div>
+        </header>
+      )}
       {isAdminLoginPage ? (
         <AdminAuth onBackHome={handleBackHome} />
       ) : isAdminDashboardPage ? (

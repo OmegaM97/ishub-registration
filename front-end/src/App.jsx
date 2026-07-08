@@ -8,11 +8,13 @@ import RegistrationForm from "./components/RegistrationForm";
 import AdminAuth from "./components/AdminAuth";
 import AdminDashboard from "./components/AdminDashboard";
 import SubmissionResult from "./components/SubmissionResult";
+import ClosedPage from "./components/ClosedPage";
 
 const REGISTRATION_URL = "/apply";
 const ADMIN_LOGIN_URL = "/admin/login";
 const ADMIN_DASHBOARD_URL = "/admin/dashboard";
 const SUBMISSION_URL = "/submission";
+const CLOSED_URL = "/closed";
 
 export default function App() {
   const pathname = window.location.pathname;
@@ -21,9 +23,10 @@ export default function App() {
   const isAdminLoginPage = pathname === ADMIN_LOGIN_URL;
   const isAdminDashboardPage = pathname === ADMIN_DASHBOARD_URL;
   const isSubmissionPage = pathname === SUBMISSION_URL;
+  const isClosedPage = pathname === CLOSED_URL;
 
   const handleApplyClick = () => {
-    window.location.href = REGISTRATION_URL;
+    window.location.href = "/closed";
   };
 
   const handleBackHome = () => {
@@ -31,7 +34,7 @@ export default function App() {
   };
 
   const showStudentHeader =
-    isHomePage || isRegistrationPage || isSubmissionPage;
+    isHomePage || isRegistrationPage || isSubmissionPage || isClosedPage;
 
   return (
     <div className="min-h-screen bg-white">
@@ -47,9 +50,11 @@ export default function App() {
       ) : isAdminDashboardPage ? (
         <AdminDashboard onBackHome={handleBackHome} />
       ) : isRegistrationPage ? (
-        <RegistrationForm onBackHome={handleBackHome} />
+        <RegistrationForm onBackHome={handleBackHome} isRegistrationClosed />
       ) : isSubmissionPage ? (
         <SubmissionResult onBackHome={handleBackHome} />
+      ) : isClosedPage ? (
+        <ClosedPage onBackHome={handleBackHome} />
       ) : (
         <main>
           <Hero onApplyClick={handleApplyClick} />

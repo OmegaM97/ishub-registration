@@ -27,7 +27,10 @@ const commitmentOptions = [
   { label: "Not sure yet", value: "No" },
 ];
 
-export default function RegistrationForm({ onBackHome }) {
+export default function RegistrationForm({
+  onBackHome,
+  isRegistrationClosed = false,
+}) {
   const [formValues, setFormValues] = useState({
     fullName: "",
     email: "",
@@ -154,6 +157,10 @@ export default function RegistrationForm({ onBackHome }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (isRegistrationClosed) {
+      return;
+    }
+
     const validationErrors = validateForm(formValues);
 
     if (Object.keys(validationErrors).length > 0) {
@@ -273,6 +280,14 @@ export default function RegistrationForm({ onBackHome }) {
                 {formError}
               </div>
             )}
+            {isRegistrationClosed && (
+              <div className="mb-8 rounded-xl2 border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
+                Registration is currently closed. We are not accepting new
+                applications right now. Please check back later for future
+                openings.
+              </div>
+            )}
+
             <div className="mb-8 grid sm:grid-cols-2 gap-4">
               <div className="flex items-center gap-3 rounded-xl2 border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700">
                 <Sparkles size={18} className="text-primary shrink-0" />
@@ -430,11 +445,11 @@ export default function RegistrationForm({ onBackHome }) {
             <div className="mt-8 flex justify-end">
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className={`inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl2 shadow-soft transition-all duration-200 hover:-translate-y-0.5 ${
-                  isSubmitting
+                disabled={isRegistrationClosed || isSubmitting}
+                className={`inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl2 shadow-soft transition-all duration-200 ${
+                  isRegistrationClosed || isSubmitting
                     ? "bg-slate-300 text-slate-700 cursor-not-allowed"
-                    : "bg-primary hover:bg-primary-dark text-white"
+                    : "bg-primary hover:bg-primary-dark text-white hover:-translate-y-0.5"
                 }`}
               >
                 {isSubmitting ? (
@@ -442,6 +457,8 @@ export default function RegistrationForm({ onBackHome }) {
                     <Send size={18} className="animate-spin" />
                     Sending...
                   </>
+                ) : isRegistrationClosed ? (
+                  <>Registration Closed</>
                 ) : (
                   <>
                     Submit Application

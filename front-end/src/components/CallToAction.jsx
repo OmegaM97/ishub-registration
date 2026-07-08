@@ -1,8 +1,8 @@
-import { ArrowRight } from 'lucide-react'
-import useReveal from '../hooks/useReveal'
+import { ArrowRight } from "lucide-react";
+import useReveal from "../hooks/useReveal";
 
 export default function CallToAction({ onApplyClick }) {
-  const ref = useReveal()
+  const ref = useReveal();
 
   return (
     <section className="py-24 lg:py-28 px-6">
@@ -19,19 +19,24 @@ export default function CallToAction({ onApplyClick }) {
             Ready to Build Your Future?
           </h2>
           <p className="mt-5 text-blue-100 text-lg max-w-2xl mx-auto leading-relaxed">
-            Applications for the ISHub Summer Bootcamp are now open. Take the
-            first step toward building practical technology skills and
-            becoming part of an inspiring learning community.
+            Registration for the ISHub Summer Bootcamp is currently closed. New
+            applications are not being accepted at the moment, but we will share
+            updates soon for future opportunities.
           </p>
           <button
             onClick={onApplyClick}
             className="group mt-9 inline-flex items-center gap-2 bg-white text-primary font-bold px-8 py-4 rounded-xl2 shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
+            aria-label="Apply Now - applications closed"
+            title="Applications are closed"
           >
             Apply Now
-            <ArrowRight size={19} className="transition-transform group-hover:translate-x-1" />
+            <ArrowRight
+              size={19}
+              className="transition-transform group-hover:translate-x-1"
+            />
           </button>
         </div>
       </div>
     </section>
-  )
+  );
 }

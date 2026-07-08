@@ -31,7 +31,7 @@ export default function Hero({ onApplyClick }) {
         <div ref={copyRef} className="reveal">
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-primary text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Applications open for Summer 2026
+            Summer 2026 applications are currently closed
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.08] tracking-tight text-slate-900">
@@ -58,6 +58,8 @@ export default function Hero({ onApplyClick }) {
             <button
               onClick={onApplyClick}
               className="group inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-7 py-3.5 rounded-xl2 shadow-soft hover:shadow-softHover transition-all duration-200 hover:-translate-y-0.5"
+              aria-label="Apply Now - applications closed"
+              title="Applications are closed"
             >
               Apply Now
               <ArrowRight
@@ -68,8 +70,8 @@ export default function Hero({ onApplyClick }) {
           </div>
 
           <p className="mt-3 text-sm text-slate-400">
-            Applications are open. Clicking "Apply Now" takes you directly to
-            the registration form.
+            New applications are paused for now. Please check back later for
+            future openings.
           </p>
         </div>
 
